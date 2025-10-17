@@ -1,29 +1,75 @@
-name: CI
+name: 🚀 CI/CD Pipeline
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch: # Permite execução manual
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: Release
 
 jobs:
-  build:
+  build-and-test:
+    name: 🏗️ Build & Test
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: crudtoalgo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: 📥 Restore dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
+      - name: 🏗️ Build solution
+        run: dotnet build --no-restore --configuration ${{ env.CONFIGURATION }}
 
-      - name: Run tests
-        run: dotnet test --no-build --verbosity normal
+      - name: 🧪 Run tests
+        run: dotnet test --no-build --configuration ${{ env.CONFIGURATION }} --verbosity normal --logger trx --results-directory "TestResults"
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=crudtoalgo_test;Username=postgres;Password=postgres;Port=5432"
+
+      - name: 📊 Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/*.trx
+
+      - name: ✅ Build success notification
+        if: success()
+        run: echo "✅ Build and tests completed successfully!"
+
+      - name: ❌ Build failure notification
+        if: failure()
+        run: echo "❌ Build or tests failed!"

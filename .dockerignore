@@ -1,0 +1,52 @@
+# .dockerignore para CrudToAlgo
+
+# Documentação
+README.md
+LICENSE
+*.md
+
+# Git
+.git
+.gitignore
+.github
+
+# Build artifacts
+**/bin
+**/obj
+**/out
+**/publish
+
+# IDEs
+.vs
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Runtime
+*.user
+*.suo
+*.cache
+
+# Test results
+TestResults
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Environment
+.env
+.env.*
+
+# Temporary files
+*.tmp
+*.temp
