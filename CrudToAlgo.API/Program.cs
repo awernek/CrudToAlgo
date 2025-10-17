@@ -26,3 +26,6 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.Run();
+
+// Tornar a classe Program acessível para os testes
+public partial class Program { }
