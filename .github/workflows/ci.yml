@@ -41,7 +41,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: 📦 Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
@@ -60,7 +60,7 @@ jobs:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=crudtoalgo_test;Username=postgres;Password=postgres;Port=5432"
 
       - name: 📊 Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
